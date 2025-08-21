@@ -201,16 +201,14 @@ def extract_user_info(html_content: str, logger: logging.Logger) -> Dict[str, an
         return {}
 
 
-def save_results(user_info: Dict[str, any], user_id: str, logger: logging.Logger, save_html: bool = False, html_content: str = None):
+def save_results(user_info: Dict[str, any], user_id: str, logger: logging.Logger):
     """
-    保存结果到文件
+    保存结果到文件（仅保存JSON，不保存HTML）
     
     Args:
         user_info (Dict[str, any]): 用户信息
         user_id (str): 用户ID
         logger (logging.Logger): 日志记录器
-        save_html (bool): 是否保存HTML文件
-        html_content (str): HTML内容
     """
     try:
         # 保存JSON结果
@@ -220,13 +218,7 @@ def save_results(user_info: Dict[str, any], user_id: str, logger: logging.Logger
         logger.info(f"✅ 用户信息已保存到: {json_filename}")
         logger.debug(f"JSON文件大小: {len(json.dumps(user_info, ensure_ascii=False))} 字符")
         
-        # 保存HTML文件（可选）
-        if save_html and html_content:
-            html_filename = f"user_{user_id.replace('-', '_')}.html"
-            with open(html_filename, 'w', encoding='utf-8') as f:
-                f.write(html_content)
-            logger.info(f"✅ HTML内容已保存到: {html_filename}")
-            logger.debug(f"HTML文件大小: {len(html_content)} 字符")
+        logger.info("ℹ️ HTML内容仅在内存中处理，未保存到文件")
             
     except Exception as e:
         logger.error(f"❌ 保存文件时出错: {e}")
@@ -283,7 +275,7 @@ def main():
     
     # 第三步：保存结果
     logger.info("步骤3: 保存结果...")
-    save_results(user_info, user_id, logger, save_html=True, html_content=html_content)
+    save_results(user_info, user_id, logger)
     
     logger.info("-" * 60)
     logger.info("🎉 任务完成！")
