@@ -242,9 +242,23 @@ def main():
     # 默认用户ID
     default_user_id = "113342-"
     
-    # 从命令行参数获取用户ID
+    # 从命令行参数获取用户ID或URL
     if len(sys.argv) > 1:
-        user_id = sys.argv[1]
+        user_input = sys.argv[1]
+        
+        # 检查是否是URL
+        if user_input.startswith('http'):
+            # 从URL中提取用户ID
+            if '/User/Actions/' in user_input:
+                user_id = user_input.split('/User/Actions/')[-1].split('?')[0].split('#')[0]
+            elif '/User/' in user_input:
+                user_id = user_input.split('/User/')[-1].split('?')[0].split('#')[0]
+            else:
+                logger.error("❌ 无法从URL中提取用户ID")
+                return
+            logger.info(f"从URL提取用户ID: {user_id}")
+        else:
+            user_id = user_input
     else:
         user_id = default_user_id
         logger.info(f"使用默认用户ID: {user_id}")

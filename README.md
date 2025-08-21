@@ -1,147 +1,124 @@
-# GetQuicker用户信息获取工具
+# GetQuicker 用户信息获取工具
 
-这个工具可以绕过GetQuicker网站的安全限制，自动获取用户页面并提取关键信息。
+这是一个用于获取 GetQuicker 用户信息和动作数据的 Python 工具集。
 
-## 项目特性
+## 🎯 功能特性
 
-- ✅ **绕过安全限制**：使用正确的Referer头绕过服务器限制
-- ✅ **自动信息提取**：提取推荐码、注册天数、专业版状态等
-- ✅ **多种提取方法**：CSS选择器 + 正则表达式备用方案
-- ✅ **完整自动化**：一键获取页面并提取信息
-- ✅ **环境管理**：使用uv进行Python环境管理
+### 📝 用户信息获取 (`get_user_info.py`)
+- 提取用户基本信息：用户名、推荐码、注册天数、专业版状态
+- 绕过访问限制，使用正确的 Referer 头
+- 多种提取方法：CSS选择器 + 正则表达式双重保障
+- 不保存HTML文件，仅在内存中处理
 
-## 安全限制分析
+### 📊 用户动作数据统计 (`get_user_actions.py`)
+- 获取用户所有公开动作数据
+- 统计总点赞数、下载数等信息
+- 支持多页数据自动翻页
+- 使用 pandas 和 lxml 高效解析HTML表格
+- 输出多种格式：JSON、CSV
 
-GetQuicker服务器有一个安全规则：**只允许从getquicker.net内部跳转访问用户页面**。
+## 🚀 快速开始
 
-- ❌ 直接访问：返回 404 Not Found
-- ✅ 带Referer访问：返回 200 OK
+### 安装依赖
 
-## 关键发现
+使用 uv（推荐）：
+```bash
+# 安装 uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-**最简化的绕过方法**：只需要在HTTP请求头中添加正确的`Referer`字段：
+# 安装依赖
+uv sync
+```
 
+### 基本使用
+
+1. **获取用户基本信息**：
+```bash
+# 使用默认用户ID
+uv run python get_user_info.py
+
+# 指定用户ID
+uv run python get_user_info.py 123456-
+
+# 指定用户主页URL
+uv run python get_user_info.py https://getquicker.net/User/123456-
+
+# 启用调试模式
+uv run python get_user_info.py --debug
+```
+
+2. **获取用户动作数据**：
+```bash
+# 获取所有动作数据并统计
+uv run python get_user_actions.py
+
+# 指定用户ID
+uv run python get_user_actions.py 123456-
+
+# 指定用户主页URL
+uv run python get_user_actions.py https://getquicker.net/User/Actions/123456-
+uv run python get_user_actions.py https://getquicker.net/User/123456-
+
+# 启用调试模式
+uv run python get_user_actions.py --debug
+```
+
+## 📄 输出文件
+
+### 用户信息
+- `user_info_{user_id}.json` - 用户基本信息
+
+### 动作数据
+- `user_actions_{user_id}.json` - 详细动作数据
+- `user_actions_{user_id}.csv` - CSV格式数据（便于Excel查看）
+- `user_stats_{user_id}.json` - 统计信息
+
+## 🔧 技术实现
+
+### 绕过访问限制
+GetQuicker服务器只允许从内部跳转访问用户页面，通过添加正确的 Referer 头解决：
 ```http
 Referer: https://getquicker.net/Share
 ```
 
-## 环境设置
+### HTML表格解析
+使用多种库提供最佳解析效果：
+- **pandas** - 主要解析方法，自动识别表格结构
+- **lxml** - 备用解析方法，高性能XPath支持
+- **BeautifulSoup** - CSS选择器支持
 
-### 1. 使用uv管理环境
+## 📊 示例输出
 
-```bash
-# 初始化项目
-uv init --python 3.11
+### 统计摘要
+```
+============================================================
+📊 统计摘要
+============================================================
+总动作数: 94
+总页数: 4
+总点赞数: 6,672
+总下载数: 86,373
+平均点赞数: 70.98
+平均下载数: 918.86
 
-# 安装依赖
-uv add requests beautifulsoup4
+🏆 点赞数最高的动作:
+  1. 剪贴板记录文件 - 5,510 点赞
+  2. 捷径面板3.0 - 235 点赞
+  3. 超级菜单 - 160 点赞
 ```
 
-### 2. 传统pip方式
+## 🛡️ 隐私保护
 
-```bash
-pip install -r requirements.txt
-```
+- 生成的用户数据文件已添加到 `.gitignore`
+- 不会将个人数据提交到代码仓库
+- HTML内容仅在内存中处理，不保存到磁盘
 
-## 使用方法
+## 📚 更多资源
 
-### 1. 完整自动化工具（推荐）
+- [HTML表格解析库说明](HTML_TABLE_LIBRARIES.md) - 详细的库选择和使用指南
+- [任务说明](task.md) - 开发任务和需求
 
-```bash
-# 使用默认用户ID (113342-)
-uv run python get_user_info_complete.py
+## 🔄 更新日志
 
-# 指定用户ID
-uv run python get_user_info_complete.py 123456-
-```
-
-### 2. 分步执行
-
-```bash
-# 步骤1: 获取页面
-uv run python simple_get_user.py
-
-# 步骤2: 提取信息
-uv run python extract_user_info.py
-```
-
-### 3. 完整版本（带更多请求头）
-
-```bash
-uv run python get_user_actions.py [用户ID]
-```
-
-## 提取的信息
-
-工具会自动提取以下用户信息：
-
-1. **推荐码**：`Ta的推荐码：113342-5249`
-2. **注册天数**：`2010天`
-3. **专业版状态**：`true/false`
-4. **用户名**：`Cea`
-
-## 文件说明
-
-### 核心脚本
-- `get_user_info_complete.py` - **完整自动化工具**（推荐使用）
-- `simple_get_user.py` - 最简化版本，只包含必要的请求头
-- `get_user_actions.py` - 完整版本，包含更多请求头和错误处理
-- `extract_user_info.py` - 信息提取工具
-
-### 配置文件
-- `pyproject.toml` - uv项目配置
-- `requirements.txt` - 传统pip依赖（备用）
-
-### 输出文件
-- `user_info_113342_.json` - 提取的用户信息（JSON格式）
-- `user_113342_.html` - 下载的页面内容
-
-## 技术原理
-
-### 安全限制绕过
-服务器通过检查HTTP请求的`Referer`头来判断请求来源：
-- 如果Referer是getquicker.net域名下的页面，则允许访问
-- 否则返回404错误
-
-这是典型的**Referer检查**安全机制，用于防止直接外部访问。
-
-### 信息提取方法
-1. **主要方法**：使用CSS选择器精确定位元素
-2. **备用方法**：使用正则表达式提取文本内容
-3. **容错处理**：多种方法确保信息提取的可靠性
-
-## 示例输出
-
-```json
-{
-  "referral_code": "Ta的推荐码：113342-5249",
-  "registration_days": "2010天",
-  "is_pro_user": true,
-  "username": "Cea"
-}
-```
-
-## 注意事项
-
-- 仅用于学习和研究目的
-- 请遵守网站的使用条款
-- 不要用于恶意目的
-- 建议合理控制请求频率
-
-## 故障排除
-
-### 常见问题
-
-1. **404错误**：检查Referer头是否正确设置
-2. **提取失败**：页面结构可能发生变化，检查CSS选择器
-3. **网络超时**：检查网络连接，适当增加超时时间
-
-### 调试方法
-
-```bash
-# 启用详细输出
-uv run python get_user_info_complete.py --debug
-
-# 保存HTML文件进行手动检查
-# HTML文件会自动保存，可以查看页面结构
-```
+- **v2.0** - 添加动作数据统计功能，使用pandas+lxml解析
+- **v1.0** - 基础用户信息获取功能
